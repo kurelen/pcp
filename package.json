@@ -1,0 +1,32 @@
+{
+  "name": "pcp",
+  "version": "1.0.0",
+  "description": "Small javascript doodle to find solutions to some pcp instances.",
+  "main": "pcp.js",
+  "scripts": {
+    "i1": "node pcp.js 1 302",
+    "i3": "node pcp.js 1 240",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"**/*.{js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md}\"",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kurelen/pcp.git"
+  },
+  "keywords": [],
+  "author": "Alexander Jandt",
+  "license": "Unlicense",
+  "bugs": {
+    "url": "https://github.com/kurelen/pcp/issues"
+  },
+  "homepage": "https://github.com/kurelen/pcp#readme",
+  "devDependencies": {
+    "eslint": "^9.39.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "prettier": "^3.7.4"
+  }
+}
