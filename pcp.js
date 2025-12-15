@@ -41,7 +41,7 @@ function solve_pcp(dominos, budget) {
     const result = [];
 
     function recursion_step(difference, remaining_budget) {
-        if (budget <= 0 || difference === undefined) {
+        if (remaining_budget <= 0 || difference === undefined) {
             return false;
         }
         for (let i = 0; i < dominos.length; i++) {
