@@ -24,13 +24,14 @@ function merge(domino_1, domino_2) {
 
 function shrink(domino) {
     const [t, b] = domino;
-    if (t.startsWith(b)) {
-        return [t.slice(b.length), ""];
-    } else if (b.startsWith(t)) {
-        return ["", b.slice(t.length)];
-    } else {
-        return undefined;
+    let i = 0;
+    while (i < t.length && i < b.length) {
+        if (t[i] !== b[i]) {
+            return undefined;
+        }
+        i++;
     }
+    return [t.slice(i), b.slice(i)];
 }
 
 function is_balanced(domino) {
