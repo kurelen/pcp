@@ -38,7 +38,7 @@ function merge_and_shrink(d1, d2) {
   }
 }
 
-function solve_pcp(dominoes, budget) {
+function solve_pcp(dominos, budget) {
   const result = [];
 
   function recursion_step(difference, budget) {
@@ -47,8 +47,8 @@ function solve_pcp(dominoes, budget) {
       return false;
     }
 
-    for (let i = 0; i < dominoes.length; i++) {
-      const new_difference = merge_and_shrink(difference, dominoes[i]);
+    for (let i = 0; i < dominos.length; i++) {
+      const new_difference = merge_and_shrink(difference, dominos[i]);
       if (new_difference == undefined) {
         continue;
       }
@@ -71,29 +71,29 @@ function solve_pcp(dominoes, budget) {
   return result.reverse();
 }
 
-function iterate_search_space(dominoes, start_budget, end_budget, incrementer) {
+function iterate_search_space(dominos, start_budget, end_budget, incrementer) {
   for (let budget = start_budget; budget <= end_budget; budget += incrementer) {
     console.log("Search with budget " + budget);
 
-    const solution = solve_pcp(dominoes, budget);
+    const solution = solve_pcp(dominos, budget);
     if (solution.length != 0) {
       return solution;
     }
   }
 }
 
-function print_solution(dominoes, solution) {
-  const dom_s = dominoes.map(
-    (domino, index) => `${index}:(${domino[0]}, ${domino[1]})`).join(" ");
+function print_solution(dominos, solution) {
+  const dom_s = dominos.map((domino, index) =>
+        `${index + 1}:(${domino[0]}, ${domino[1]})`).join(" ");
   if (!Array.isArray(solution) || solution.length == 0) {
-    console.log("No solution for dominoes found " + dom_s);
+    console.log("No solution for dominos found " + dom_s);
     return;
   } 
   console.log("Found solution of length " + solution.length);
-  console.log("Dominoes " + dom_s);
-  console.log("Solution " + solution.join(","));
-  console.log(solution.map(i => dominoes[i][0]).join(""));
-  console.log(solution.map(i => dominoes[i][1]).join(""));
+  console.log("Dominos  > " + dom_s);
+  console.log("Solution > " + solution.map(i => i + 1).join(","));
+  console.log("Top      > " + solution.map(i => dominos[i][0]).join(""));
+  console.log("Bottom   > " + solution.map(i => dominos[i][1]).join(""));
 }
 
 function parseOptions() {
@@ -105,7 +105,7 @@ function parseOptions() {
   }
   const [instance, start_budget, end_budget, incrementer ] = options
   return {
-    dominoes: instances[instance - 1],
+    dominos: instances[instance - 1],
     instance,
     start_budget: start_budget,
     end_budget: end_budget ?? start_budget,
@@ -118,11 +118,11 @@ function processOptions(options) {
     console.log("Usage: node pcp.js [instance 1,2,3] [start_budget int] [end_budget int] [incrementer int]");
     return;
   }
-  const { dominoes, start_budget, end_budget, incrementer } = options;
+  const { dominos, start_budget, end_budget, incrementer } = options;
   print_solution(
-    dominoes,
+    dominos,
     iterate_search_space(
-      dominoes,
+      dominos,
       start_budget,
       end_budget,
       incrementer));
