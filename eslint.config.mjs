@@ -30,6 +30,14 @@ export default defineConfig([
             sourceType: "module",
         },
 
-        rules: {},
+        rules: {
+            eqeqeq: "error",
+            "no-var": "error",
+            "prefer-const": "warn",
+            "no-unused-vars": "error",
+            curly: ["error", "all"],
+            "no-shadow": "warn",
+            "no-implicit-coercion": "error",
+        },
     },
 ]);

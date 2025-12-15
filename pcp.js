@@ -34,21 +34,21 @@ function shrink(domino) {
 }
 
 function is_balanced(domino) {
-    return domino[0] == domino[1];
+    return domino[0] === domino[1];
 }
 
 function solve_pcp(dominos, budget) {
     const result = [];
 
-    function recursion_step(difference, budget) {
-        if (budget <= 0 || difference == undefined) {
+    function recursion_step(difference, remaining_budget) {
+        if (budget <= 0 || difference === undefined) {
             return false;
         }
         for (let i = 0; i < dominos.length; i++) {
             const merged_domino = merge(difference, dominos[i]);
             if (
                 is_balanced(merged_domino) ||
-                recursion_step(shrink(merged_domino), budget - 1)
+                recursion_step(shrink(merged_domino), remaining_budget - 1)
             ) {
                 result.push(i);
                 return true;
@@ -71,7 +71,7 @@ function iterate_search_space(dominos, start_budget, end_budget, incrementer) {
         console.log("Search with budget " + budget);
 
         const solution = solve_pcp(dominos, budget);
-        if (solution.length != 0) {
+        if (solution.length !== 0) {
             return solution;
         }
     }
@@ -81,7 +81,7 @@ function print_solution(dominos, solution) {
     const dom_s = dominos
         .map((domino, index) => `${index + 1}:(${domino[0]},${domino[1]})`)
         .join(" ");
-    if (!Array.isArray(solution) || solution.length == 0) {
+    if (!Array.isArray(solution) || solution.length === 0) {
         console.log("No solution for dominos found " + dom_s);
         return;
     }
@@ -96,8 +96,8 @@ function parseOptions() {
     const options = process.argv
         .slice(2)
         .map((s) => parseInt(s, 10))
-        .filter((n) => n > 0);
-    if (options.length == 0 || options[0] > 3 || options[1] == undefined) {
+        .filter((n) => Number.isSafeInteger(n) && n > 0);
+    if (options.length === 0 || options[0] > 3 || options[1] === undefined) {
         return undefined;
     }
     const [index, start_budget, end_budget, incrementer] = options;
@@ -110,7 +110,7 @@ function parseOptions() {
 }
 
 function processOptions(options) {
-    if (options == undefined) {
+    if (options === undefined) {
         console.log(
             "Usage: node pcp.js [instance 1,2,3] [start_budget int] [end_budget int] [incrementer int]"
         );
