@@ -49,11 +49,9 @@ function solve_pcp(dominos, budget) {
       if (t == "" && b == "") {
         result.push(i);
         return true;
-      } else {
-        if (recursion_step(new_difference, budget - 1)) {
-          result.push(i);
-          return true;
-        }
+      } else if (recursion_step(new_difference, budget - 1)) {
+        result.push(i);
+        return true;
       }
     }
     return false;
@@ -77,7 +75,7 @@ function iterate_search_space(dominos, start_budget, end_budget, incrementer) {
 
 function print_solution(dominos, solution) {
   const dom_s = dominos
-    .map((domino, index) => `${index + 1}:(${domino[0]}, ${domino[1]})`)
+    .map((domino, index) => `${index + 1}:(${domino[0]},${domino[1]})`)
     .join(" ");
   if (!Array.isArray(solution) || solution.length == 0) {
     console.log("No solution for dominos found " + dom_s);
