@@ -1,24 +1,22 @@
-const instance_1 = [
-  ["111", "110"],
-  ["011", "1"],
-  ["10", "100"],
-  ["0", "11"],
-];
-
-const instance_2 = [
-  ["0", "111"],
-  ["11", "0"],
-  ["10", "100"],
-  ["000", "0"],
-];
-
-const instance_3 = [
-  ["11101", "0110"],
-  ["110", "1"],
-  ["1", "1011"],
-];
-
-const instances = [instance_1, instance_2, instance_3];
+const instances = {
+  1: [
+    ["111", "110"],
+    ["011", "1"],
+    ["10", "100"],
+    ["0", "11"],
+  ],
+  2: [
+    ["0", "111"],
+    ["11", "0"],
+    ["10", "100"],
+    ["000", "0"],
+  ],
+  3: [
+    ["11101", "0110"],
+    ["110", "1"],
+    ["1", "1011"],
+  ],
+};
 
 function merge_and_shrink(d1, d2) {
   let t = d1[0] + d2[0];
@@ -96,10 +94,9 @@ function parseOptions() {
   if (options.length == 0 || options[0] > 3 || options[1] == undefined) {
     return undefined;
   }
-  const [instance, start_budget, end_budget, incrementer] = options;
+  const [index, start_budget, end_budget, incrementer] = options;
   return {
-    dominos: instances[instance - 1],
-    instance,
+    dominos: instances[index],
     start_budget: start_budget,
     end_budget: end_budget ?? start_budget,
     incrementer: incrementer ?? 1,
