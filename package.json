@@ -7,8 +7,8 @@
     "i1": "node pcp.js 1 302",
     "i3": "node pcp.js 1 240",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --write \"**/*.{js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{js,json,md}\"",
+    "format": "prettier --write \"**/*.{js,json,md,mjs}\"",
+    "format:check": "prettier --check \"**/*.{js,json,md,mjs}\"",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
