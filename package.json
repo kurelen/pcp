@@ -5,6 +5,7 @@
     "main": "pcp.js",
     "scripts": {
         "i1": "node pcp.js 1 302",
+        "i2": "node pcp.js 2 218 218 1 3",
         "i3": "node pcp.js 3 240",
         "test": "echo \"Error: no test specified\" && exit 1",
         "format": "prettier --write \"**/*.{js,json,md,mjs}\"",
