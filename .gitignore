@@ -52,3 +52,6 @@ coverage/
 *.swo
 *~
 .DS_Store
+
+# textfiles
+*.txt
