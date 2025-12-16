@@ -1,6 +1,7 @@
 # PCP solver
 
-Small javascript doodle to find solutions to some pcp instances.
+Small javascript doodle to find solutions to some
+[pcp](https://en.wikipedia.org/wiki/Post_correspondence_problem) instances.
 
 ## Usage
 
