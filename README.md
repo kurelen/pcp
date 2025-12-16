@@ -6,7 +6,7 @@ Small javascript doodle to find solutions to some pcp instances.
 
 Run using nodejs:
 
-`node pcp.js [instance] [start_budget] [[end_budget] [incrementer]]`
+`node pcp.js [instance] [start_budget] [[end_budget] [incrementer] [explore]]`
 
 With:
 
@@ -14,6 +14,7 @@ With:
 - `[start_budget]` non-negative number
 - `[end_budget]` non-negative number greater than [start_budget]
 - `[incrementer]` non-negative number
+- `[explore]` indices of dominos
 
 ## Project structure
 

@@ -138,18 +138,18 @@ function parseOptions() {
         start_budget: start_budget,
         end_budget: end_budget ?? start_budget,
         incrementer: incrementer ?? 1,
-        explore: explore.map((i) => i - 1) ?? [],
+        explore: valid ? explore.map((i) => i - 1) : [],
     };
 }
 
 function processOptions(options) {
     if (options === undefined) {
         console.log(
-            "Usage: node pcp.js [instance 1,2,3] [start_budget int] [end_budget int] [incrementer int]"
+            "Usage: node pcp.js [instance 1,2,3] [start_budget int] [end_budget int]\n" +
+                "                   [incrementer int] [explore [int]]"
         );
         return;
     }
-    const { dominos, start_budget, end_budget, incrementer, explore } = options;
     print_solution(options, iterate_search_space(options));
 }
 
