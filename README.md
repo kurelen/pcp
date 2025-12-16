@@ -16,6 +16,11 @@ With:
 - `[incrementer]` non-negative number
 - `[explore]` indices of dominos
 
+For example `node pcp.js 1 100 300 50 2 2` searches in instance `1` starting with
+budget `100`, going up to budget `300` increasing by `50`, and exploring the 
+search space by requiring a solution to start with `2,2`.
+
+
 ## Project structure
 
 Linting and formatting via npm modules Prettier and Eslint
