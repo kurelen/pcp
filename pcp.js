@@ -38,7 +38,7 @@ function is_balanced(domino) {
     return domino[0] === domino[1];
 }
 
-function solve_pcp(dominos, budget) {
+function solve_pcp(dominos, budget, start_difference) {
     const result = [];
 
     function recursion_step(difference, remaining_budget) {
@@ -58,12 +58,21 @@ function solve_pcp(dominos, budget) {
         return false;
     }
 
-    recursion_step(["", ""], budget);
+    recursion_step(start_difference, budget);
 
     return result.reverse();
 }
 
-function iterate_search_space(dominos, start_budget, end_budget, incrementer) {
+function iterate_search_space(options) {
+    const { dominos, start_budget, end_budget, incrementer, explore } = options;
+
+    const start_difference = shrink(
+        explore.map((i) => dominos[i]).reduce(merge, ["", ""])
+    );
+
+    if (start_difference === undefined) {
+        return { type: "error" };
+    }
     for (
         let budget = start_budget;
         budget <= end_budget;
@@ -71,26 +80,46 @@ function iterate_search_space(dominos, start_budget, end_budget, incrementer) {
     ) {
         console.log("Search with budget " + budget);
 
-        const solution = solve_pcp(dominos, budget);
+        const solution = solve_pcp(dominos, budget, start_difference);
         if (solution.length !== 0) {
-            return solution;
+            return { type: "found", result: [...explore, ...solution] };
         }
     }
+    return { type: "not_found" };
 }
 
-function print_solution(dominos, solution) {
+function print_solution(options, solution) {
+    const { dominos, explore } = options;
+    const { type, result } = solution;
     const dom_s = dominos
         .map((domino, index) => `${index + 1}:(${domino[0]},${domino[1]})`)
         .join(" ");
-    if (!Array.isArray(solution) || solution.length === 0) {
-        console.log("No solution for dominos found " + dom_s);
-        return;
+    switch (type) {
+        case "error":
+            console.log("Can't explore invalid start configuration");
+            console.log("Dominos  > " + dom_s);
+            console.log("Explore  > " + explore.map((i) => i + 1).join(""));
+            console.log(
+                "Top      > " + explore.map((i) => dominos[i][0]).join("")
+            );
+            console.log(
+                "Bottom   > " + explore.map((i) => dominos[i][1]).join("")
+            );
+            return;
+        case "not_found":
+            console.log("No solution for dominos found " + dom_s);
+            return;
+        default:
+            console.log("Found solution of length " + result.length);
+            console.log("Dominos  > " + dom_s);
+            console.log("Solution > " + result.map((i) => i + 1).join(","));
+            console.log(
+                "Top      > " + result.map((i) => dominos[i][0]).join("")
+            );
+            console.log(
+                "Bottom   > " + result.map((i) => dominos[i][1]).join("")
+            );
     }
-    console.log("Found solution of length " + solution.length);
-    console.log("Dominos  > " + dom_s);
-    console.log("Solution > " + solution.map((i) => i + 1).join(","));
-    console.log("Top      > " + solution.map((i) => dominos[i][0]).join(""));
-    console.log("Bottom   > " + solution.map((i) => dominos[i][1]).join(""));
 }
 
 function parseOptions() {
@@ -101,12 +130,15 @@ function parseOptions() {
     if (options.length === 0 || options[0] > 3 || options[1] === undefined) {
         return undefined;
     }
-    const [index, start_budget, end_budget, incrementer] = options;
+    const [index, start_budget, end_budget, incrementer, ...explore] = options;
+    const dominos = instances[index];
+    const valid = explore.every((n) => n > 0 && n <= dominos.length);
     return {
-        dominos: instances[index],
+        dominos,
         start_budget: start_budget,
         end_budget: end_budget ?? start_budget,
         incrementer: incrementer ?? 1,
+        explore: explore.map((i) => i - 1) ?? [],
     };
 }
 
@@ -117,11 +149,8 @@ function processOptions(options) {
         );
         return;
     }
-    const { dominos, start_budget, end_budget, incrementer } = options;
-    print_solution(
-        dominos,
-        iterate_search_space(dominos, start_budget, end_budget, incrementer)
-    );
+    const { dominos, start_budget, end_budget, incrementer, explore } = options;
+    print_solution(options, iterate_search_space(options));
 }
 
 processOptions(parseOptions());
