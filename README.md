@@ -26,8 +26,19 @@ npm run lint
 npm run format
 ```
 
-## TODO
+To find solutions to the instances:
 
-No solution for instance 2 is found. Is there a way to improve the code,
-such that some heuristic can abort the search tree faster, or that it can
-proof that no solution exists?
+```bash
+npm run i1
+npm run i2
+npm run i3
+```
+
+## To do
+
+The solution to instance 2 was found by luck, rearranging the dominos was necessary
+and implementing the explore flag, as well as starting it not with the (0,000) one.
+The solution was found due to the lucky guess of budget 220.
+
+Is there a way to improve the code such that it reasons about some dominos
+configurations? 
