@@ -18,9 +18,8 @@ With:
 - `[explore]` indices of dominos
 
 For example `node pcp.js 1 100 300 50 2 2` searches in instance `1` starting with
-budget `100`, going up to budget `300` increasing by `50`, and exploring the 
+budget `100`, going up to budget `300` increasing by `50`, and exploring the
 search space by requiring a solution to start with `2,2`.
-
 
 ## Project structure
 
@@ -47,4 +46,4 @@ and implementing the explore flag, as well as starting it not with the (0,000) o
 The solution was found due to the lucky guess of budget 220.
 
 Is there a way to improve the code such that it reasons about some dominos
-configurations? 
+configurations?

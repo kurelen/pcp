@@ -1,3 +1,6 @@
+const command_ling_args = require("command-line-args");
+const command_ling_usage = require("command-line-usage");
+
 const instances = {
     1: [
         ["111", "110"],
@@ -142,6 +145,146 @@ function parseOptions() {
     };
 }
 
+const options_definition = [
+    {
+        name: "dominos",
+        alias: "d",
+        type: String,
+        multiple: true,
+        description:
+            'Dominos in format "top,bottom" seperated by spaces. Example: --dominos',
+    },
+    {
+        name: "read",
+        alias: "r",
+        type: String,
+        typeLabel: "{underline file}",
+        description: "Read dominos from a file (whitespace separated)",
+    },
+    {
+        name: "budget",
+        alias: "b",
+        type: String,
+        typeLabel: "{underline range}",
+        description:
+            'Budget range. Examples: "200" for a single value, "200..210" for range with step 1, "200..200:2" for custom step',
+    },
+    {
+        name: "explore",
+        alias: "e",
+        type: Number,
+        multiple: true,
+        typeLabel: "{underline indices...}",
+        description:
+            "Start with specific domino indices (1-based). Example: --explore 4 2",
+    },
+    {
+        name: "max-op",
+        alias: "m",
+        type: Number,
+        typeLabel: "{underline count}",
+        description: "Maximum operations per search",
+    },
+    {
+        name: "help",
+        alias: "h",
+        type: Boolean,
+        description: "Display this usage guide",
+    },
+    {
+        name: "reverse",
+        alias: "x",
+        type: Boolean,
+        description: "Iterate over dominos in reverse order",
+    },
+    {
+        name: "verbose",
+        alias: "v",
+        type: Boolean,
+        description: "Verbose output",
+    },
+];
+
+const range_regex = /^(\d+)(\.\.(\d+)(:(\d+))?)?$/;
+const domino_regex = /^[^,],[^,]$/;
+
+function validate_options(options) {
+    const { budget, dominos, read, explore, max_op } = options;
+
+    if (budget == undefined) {
+        throw new Error("Missing budget (--budget)");
+    }
+    const match = budget.match(range_regex);
+    if (!match) {
+        throw new Error('Invalid budget range "' + budget + '"');
+    }
+    const start = parseInt(match[1], 10);
+    const end = match[3] ? parseInt(match[3], 10) : start;
+    const step = match[5] ? parseInt(match[5], 10) : 1;
+    if (start > end) {
+        throw new Error("Invalid range, " + start + " > " + end);
+    }
+
+    options.budget = { start, end, step };
+
+    if (dominos != undefined && read != undefined) {
+        throw new Error("Mutual exclusive arguments '--dominos' and '--read'");
+    }
+    if (dominos != undefined) {
+    }
+
+    if (explore != undefined) {
+        for (i in explore) {
+            if (i <= 0) {
+                throw new Error("Explore index " + i + " to small");
+            } else if (dominos != undefined && i > dominos.length) {
+                throw new Error(
+                    "Explore index " +
+                        i +
+                        " out of bounds (" +
+                        dominos.length +
+                        ")"
+                );
+            }
+        }
+    }
+}
+
+const usage_definition = [
+    {
+        header: "PCP Solver",
+        content: "Solves Post Correspondence Problem instances",
+    },
+    {
+        header: "Options",
+        optionList: options_definition,
+    },
+    {
+        header: "Examples",
+        content: [
+            {
+                desc: "1. Using stdin",
+                example: "$ node pcp.js --budget 200..210:2",
+            },
+            {
+                desc: "2. Inline dominos",
+                example:
+                    "$ node pcp.js --dominos 11101,0110 110,1 1,1011 --budget 302",
+            },
+            {
+                desc: "3. From file",
+                example:
+                    "$ node pcp.js --open dominos.txt --budget 200..210 --reverse",
+            },
+            {
+                desc: "4. With explore",
+                example:
+                    "$ node pcp.js --dominos 000,0 0,111 11,0 10,100 --budget 202 --reverse --explore 4 2",
+            },
+        ],
+    },
+];
+
 function processOptions(options) {
     if (options === undefined) {
         console.log(
@@ -153,4 +296,25 @@ function processOptions(options) {
     print_solution(options, iterate_search_space(options));
 }
 
-processOptions(parseOptions());
+// processOptions(parseOptions());
+
+function main() {
+    let options;
+    try {
+        options = command_ling_args(options_definition);
+        validate_options(options);
+    } catch (err) {
+        console.error(err.message);
+        // console.log(command_ling_usage(usage_definition));
+        process.exit(1);
+    }
+
+    if (options.help) {
+        console.log(command_ling_usage(usage_definition));
+        process.exit(0);
+    }
+
+    console.log(options);
+}
+
+main();
