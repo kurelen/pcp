@@ -26,7 +26,6 @@ function is_balanced(domino) {
 
 function solve_pcp(dominos, budget, start_difference, reverse) {
     const result = [];
-    const traverse_step = reverse ? -1 : +1;
 
     function recursion_step(difference, remaining_budget) {
         if (remaining_budget <= 0 || difference === undefined) {
@@ -34,8 +33,8 @@ function solve_pcp(dominos, budget, start_difference, reverse) {
         }
         for (
             let i = reverse ? dominos.length - 1 : 0;
-            i < dominos.length;
-            i += traverse_step
+            reverse ? i >= 0 : i < dominos.length;
+            reverse ? i-- : i++
         ) {
             const merged_domino = merge(difference, dominos[i]);
             if (
@@ -77,7 +76,7 @@ function iterate_search_space(options) {
     for (let budget = start; budget <= end; budget += step) {
         log("Search with budget " + budget);
 
-        const solution = solve_pcp(dominos, budget, start_difference);
+        const solution = solve_pcp(dominos, budget, start_difference, reverse);
         if (solution.length !== 0) {
             return { type: "found", result: [...explore, ...solution] };
         }
