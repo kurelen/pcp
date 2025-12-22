@@ -1,25 +1,6 @@
+const fs = require("fs");
 const command_ling_args = require("command-line-args");
 const command_ling_usage = require("command-line-usage");
-
-const instances = {
-    1: [
-        ["111", "110"],
-        ["011", "1"],
-        ["10", "100"],
-        ["0", "11"],
-    ],
-    2: [
-        ["000", "0"],
-        ["0", "111"],
-        ["11", "0"],
-        ["10", "100"],
-    ],
-    3: [
-        ["11101", "0110"],
-        ["110", "1"],
-        ["1", "1011"],
-    ],
-};
 
 function merge(domino_1, domino_2) {
     return [domino_1[0] + domino_2[0], domino_1[1] + domino_2[1]];
@@ -125,26 +106,6 @@ function print_solution(options, solution) {
     }
 }
 
-function parseOptions() {
-    const options = process.argv
-        .slice(2)
-        .map((s) => parseInt(s, 10))
-        .filter((n) => Number.isSafeInteger(n) && n > 0);
-    if (options.length === 0 || options[0] > 3 || options[1] === undefined) {
-        return undefined;
-    }
-    const [index, start_budget, end_budget, incrementer, ...explore] = options;
-    const dominos = instances[index];
-    const valid = explore.every((n) => n > 0 && n <= dominos.length);
-    return {
-        dominos,
-        start_budget: start_budget,
-        end_budget: end_budget ?? start_budget,
-        incrementer: incrementer ?? 1,
-        explore: valid ? explore.map((i) => i - 1) : [],
-    };
-}
-
 const options_definition = [
     {
         name: "dominos",
@@ -206,10 +167,18 @@ const options_definition = [
 ];
 
 const range_regex = /^(\d+)(\.\.(\d+)(:(\d+))?)?$/;
-const domino_regex = /^[^,],[^,]$/;
+const domino_regex = /^([^,\s]),([^,\s])$/;
+const whitespace_regex = /\s+/;
+
+function read_dominos(filePath) {
+    const content = fs.readFileSync(filePath, "utf-8");
+    return content.split(whitespace_regex);
+}
 
 function validate_options(options) {
-    const { budget, dominos, read, explore, max_op } = options;
+    const { budget, dominos, read, explore, help, max_op, reverse, verbose } =
+        options;
+    const result = { help, max_op, reverse, verbose };
 
     if (budget == undefined) {
         throw new Error("Missing budget (--budget)");
@@ -225,29 +194,51 @@ function validate_options(options) {
         throw new Error("Invalid range, " + start + " > " + end);
     }
 
-    options.budget = { start, end, step };
+    result.budget = { start, end, step };
 
     if (dominos != undefined && read != undefined) {
         throw new Error("Mutual exclusive arguments '--dominos' and '--read'");
     }
-    if (dominos != undefined) {
+    let ds =
+        dominos != undefined
+            ? dominos
+            : read != undefined
+              ? read_dominos(read)
+              : read_dominos(0);
+
+    if (ds.length == 0) {
+        throw new Error("Dominos must not be empty");
     }
 
-    if (explore != undefined) {
-        for (i in explore) {
-            if (i <= 0) {
-                throw new Error("Explore index " + i + " to small");
-            } else if (dominos != undefined && i > dominos.length) {
-                throw new Error(
-                    "Explore index " +
-                        i +
-                        " out of bounds (" +
-                        dominos.length +
-                        ")"
-                );
+    result.dominos = ds
+        .filter((s) => s != "")
+        .map((domino) => {
+            const match = domino.match(domino_regex);
+            if (
+                match == undefined ||
+                match[1] == undefined ||
+                match[2] == undefined
+            ) {
+                throw new Error("Invalid formatted domino " + domino);
             }
-        }
+            return [match[1], match[2]];
+        });
+
+    const dominos_amount = result.dominos.length;
+
+    if (explore != undefined) {
+        result.explore = explore.map((index) => {
+            index = index - 1;
+            if (0 <= index && index < dominos_amount) {
+                return index;
+            }
+            throw new Error(
+                "Explore index " + i + " out of bounds (" + dominos_amount + ")"
+            );
+        });
     }
+
+    return result;
 }
 
 const usage_definition = [
@@ -296,16 +287,13 @@ function processOptions(options) {
     print_solution(options, iterate_search_space(options));
 }
 
-// processOptions(parseOptions());
-
 function main() {
     let options;
     try {
-        options = command_ling_args(options_definition);
-        validate_options(options);
+        options = validate_options(command_ling_args(options_definition));
     } catch (err) {
         console.error(err.message);
-        // console.log(command_ling_usage(usage_definition));
+        console.log(command_ling_usage(usage_definition));
         process.exit(1);
     }
 
