@@ -24,14 +24,19 @@ function is_balanced(domino) {
     return domino[0] === domino[1];
 }
 
-function solve_pcp(dominos, budget, start_difference) {
+function solve_pcp(dominos, budget, start_difference, reverse) {
     const result = [];
+    const traverse_step = reverse ? -1 : +1;
 
     function recursion_step(difference, remaining_budget) {
         if (remaining_budget <= 0 || difference === undefined) {
             return false;
         }
-        for (let i = 0; i < dominos.length; i++) {
+        for (
+            let i = reverse ? dominos.length - 1 : 0;
+            i < dominos.length;
+            i += traverse_step
+        ) {
             const merged_domino = merge(difference, dominos[i]);
             if (
                 is_balanced(merged_domino) ||
@@ -55,12 +60,16 @@ function iterate_search_space(options) {
         budget: { start, end, step },
         explore,
         verbose,
+        reverse,
     } = options;
     const log = verbose ? console.log : noop;
 
-    const start_difference = shrink(
-        explore.map((i) => dominos[i]).reduce(merge, ["", ""])
-    );
+    const exploration = explore.map((i) => dominos[i]).reduce(merge, ["", ""]);
+    if (explore.length > 0) {
+        log("Reify    > " + exploration.join(","));
+    }
+
+    const start_difference = shrink(exploration);
 
     if (start_difference === undefined) {
         return { type: "error" };
@@ -81,27 +90,28 @@ function noop() {
 }
 
 function process_options(options) {
-    const solution = iterate_search_space(options);
-
     const { dominos, explore, verbose } = options;
     const log = verbose ? console.log : noop;
-    const { type, result } = solution;
     const dom_s = dominos
         .map((domino, index) => `${index + 1}:(${domino[0]},${domino[1]})`)
         .join(" ");
 
     log("Dominos  > " + dom_s);
+    if (explore.length > 0) {
+        log("Explore  > " + explore.map((i) => i + 1).join(","));
+    }
+
+    const solution = iterate_search_space(options);
+    const { type, result } = solution;
 
     switch (type) {
         case "error":
             console.log("Invalid start configuration");
-            log("Dominos  > " + dom_s);
-            log("Explore  > " + explore.map((i) => i + 1).join(""));
             log("Top      > " + explore.map((i) => dominos[i][0]).join(""));
             log("Bottom   > " + explore.map((i) => dominos[i][1]).join(""));
             return;
         case "not_found":
-            console.log("No solution for dominos found " + dom_s);
+            console.log("No solution found");
             return;
         default:
             log("Found solution of length " + result.length);
