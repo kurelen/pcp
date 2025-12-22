@@ -24,24 +24,15 @@ function is_balanced(domino) {
     return domino[0] === domino[1];
 }
 
-function solve_pcp(dominos, budget, start_difference, max_op) {
-    console.log(max_op)
+function solve_pcp(dominos, budget, start_difference) {
     const result = [];
 
     function recursion_step(difference, remaining_budget) {
-        if (
-            remaining_budget <= 0 ||
-            difference === undefined ||
-            (max_op != undefined && max_op < 0)
-        ) {
+        if (remaining_budget <= 0 || difference === undefined) {
             return false;
         }
         for (let i = 0; i < dominos.length; i++) {
             const merged_domino = merge(difference, dominos[i]);
-            if (max_op != undefined) {
-                console.log(max_op);
-                max_op--;
-            }
             if (
                 is_balanced(merged_domino) ||
                 recursion_step(shrink(merged_domino), remaining_budget - 1)
@@ -64,7 +55,6 @@ function iterate_search_space(options) {
         budget: { start, end, step },
         explore,
         verbose,
-        max_op,
     } = options;
     const log = verbose ? console.log : noop;
 
@@ -78,7 +68,7 @@ function iterate_search_space(options) {
     for (let budget = start; budget <= end; budget += step) {
         log("Search with budget " + budget);
 
-        const solution = solve_pcp(dominos, budget, start_difference, max_op);
+        const solution = solve_pcp(dominos, budget, start_difference);
         if (solution.length !== 0) {
             return { type: "found", result: [...explore, ...solution] };
         }
@@ -155,13 +145,6 @@ const options_definition = [
             "Start with specific domino indices (1-based). Example: --explore 4 2",
     },
     {
-        name: "max-op",
-        alias: "m",
-        type: Number,
-        typeLabel: "{underline count}",
-        description: "Maximum operations per search",
-    },
-    {
         name: "help",
         alias: "h",
         type: Boolean,
@@ -191,11 +174,10 @@ function read_dominos(filePath) {
 }
 
 function validate_options(options) {
-    const { budget, dominos, read, explore, help, "max-op": max_op, reverse, verbose } =
-        options;
-    const result = { help, max_op, reverse, verbose };
+    const { budget, dominos, read, explore, help, reverse, verbose } = options;
+    const result = { help, reverse, verbose };
 
-    if (budget == undefined) {
+    if (budget === undefined) {
         throw new Error("Missing budget (--budget)");
     }
     const match = budget.match(range_regex);
@@ -211,41 +193,41 @@ function validate_options(options) {
 
     result.budget = { start, end, step };
 
-    if (max_op != undefined && max_op <=0) {
-        throw new Error("Maximal operations must be greater than zero");
-    }
-    if (dominos != undefined && read != undefined) {
+    if (dominos !== undefined && read !== undefined) {
         throw new Error("Mutual exclusive arguments '--dominos' and '--read'");
     }
-    let ds = (dominos ?? read_dominos(read ?? 0))
+    const ds = (dominos ?? read_dominos(read ?? 0))
         .map((s) => s.trim())
-        .filter((s) => s != "");
+        .filter((s) => s !== "");
 
-    if (ds.length == 0) {
+    if (ds.length === 0) {
         throw new Error("Dominos must not be empty");
     }
 
     result.dominos = ds.map((domino) => {
-        const match = domino.match(domino_regex);
+        const domino_match = domino.match(domino_regex);
         if (
-            match == undefined ||
-            match[1] == undefined ||
-            match[2] == undefined
+            domino_match === undefined ||
+            domino_match[1] === undefined ||
+            domino_match[2] === undefined
         ) {
             throw new Error('Invalid formatted domino "' + domino + '"');
         }
-        return [match[1], match[2]];
+        return [domino_match[1], domino_match[2]];
     });
 
     const dominos_amount = result.dominos.length;
 
     result.explore = (explore ?? []).map((index) => {
-        index = index - 1;
-        if (0 <= index && index < dominos_amount) {
-            return index;
+        if (0 < index && index <= dominos_amount) {
+            return index - 1;
         }
         throw new Error(
-            "Explore index " + i + " out of bounds (" + dominos_amount + ")"
+            'Explore value "' +
+                index +
+                '" out of bounds, only ' +
+                dominos_amount +
+                " dominos supplied"
         );
     });
 
@@ -288,6 +270,7 @@ const usage_definition = [
 ];
 
 function main() {
+    let options;
     try {
         options = validate_options(command_ling_args(options_definition));
     } catch (err) {
@@ -300,7 +283,6 @@ function main() {
         console.log(command_ling_usage(usage_definition));
         process.exit(0);
     }
-    console.log(options);
 
     process_options(options);
 }
