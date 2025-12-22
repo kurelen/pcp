@@ -4,9 +4,9 @@
     "description": "Small javascript doodle to find solutions to some pcp instances.",
     "main": "pcp.js",
     "scripts": {
-        "i1": "node pcp.js 1 302",
-        "i2": "node pcp.js 2 204 204 1 4 2",
-        "i3": "node pcp.js 3 240",
+        "i1": "./pcp.js --read instance_1.txt --budget=302",
+        "i2": "./pcp.js --read instance_2.txt --budget=204 --explore 4 2 --reverse --max-op=10000",
+        "i3": "./pcp.js --read instance_3.txt --budget=240",
         "test": "echo \"Error: no test specified\" && exit 1",
         "format": "prettier --write \"**/*.{js,json,md,mjs}\"",
         "format:check": "prettier --check \"**/*.{js,json,md,mjs}\"",

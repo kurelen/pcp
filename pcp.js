@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const fs = require("fs");
 const command_ling_args = require("command-line-args");
 const command_ling_usage = require("command-line-usage");
@@ -22,15 +24,24 @@ function is_balanced(domino) {
     return domino[0] === domino[1];
 }
 
-function solve_pcp(dominos, budget, start_difference) {
+function solve_pcp(dominos, budget, start_difference, max_op) {
+    console.log(max_op)
     const result = [];
 
     function recursion_step(difference, remaining_budget) {
-        if (remaining_budget <= 0 || difference === undefined) {
+        if (
+            remaining_budget <= 0 ||
+            difference === undefined ||
+            (max_op != undefined && max_op < 0)
+        ) {
             return false;
         }
         for (let i = 0; i < dominos.length; i++) {
             const merged_domino = merge(difference, dominos[i]);
+            if (max_op != undefined) {
+                console.log(max_op);
+                max_op--;
+            }
             if (
                 is_balanced(merged_domino) ||
                 recursion_step(shrink(merged_domino), remaining_budget - 1)
@@ -48,7 +59,14 @@ function solve_pcp(dominos, budget, start_difference) {
 }
 
 function iterate_search_space(options) {
-    const { dominos, start_budget, end_budget, incrementer, explore } = options;
+    const {
+        dominos,
+        budget: { start, end, step },
+        explore,
+        verbose,
+        max_op,
+    } = options;
+    const log = verbose ? console.log : noop;
 
     const start_difference = shrink(
         explore.map((i) => dominos[i]).reduce(merge, ["", ""])
@@ -57,14 +75,10 @@ function iterate_search_space(options) {
     if (start_difference === undefined) {
         return { type: "error" };
     }
-    for (
-        let budget = start_budget;
-        budget <= end_budget;
-        budget += incrementer
-    ) {
-        console.log("Search with budget " + budget);
+    for (let budget = start; budget <= end; budget += step) {
+        log("Search with budget " + budget);
 
-        const solution = solve_pcp(dominos, budget, start_difference);
+        const solution = solve_pcp(dominos, budget, start_difference, max_op);
         if (solution.length !== 0) {
             return { type: "found", result: [...explore, ...solution] };
         }
@@ -72,37 +86,38 @@ function iterate_search_space(options) {
     return { type: "not_found" };
 }
 
-function print_solution(options, solution) {
-    const { dominos, explore } = options;
+function noop() {
+    return undefined;
+}
+
+function process_options(options) {
+    const solution = iterate_search_space(options);
+
+    const { dominos, explore, verbose } = options;
+    const log = verbose ? console.log : noop;
     const { type, result } = solution;
     const dom_s = dominos
         .map((domino, index) => `${index + 1}:(${domino[0]},${domino[1]})`)
         .join(" ");
+
+    log("Dominos  > " + dom_s);
+
     switch (type) {
         case "error":
-            console.log("Can't explore invalid start configuration");
-            console.log("Dominos  > " + dom_s);
-            console.log("Explore  > " + explore.map((i) => i + 1).join(""));
-            console.log(
-                "Top      > " + explore.map((i) => dominos[i][0]).join("")
-            );
-            console.log(
-                "Bottom   > " + explore.map((i) => dominos[i][1]).join("")
-            );
+            console.log("Invalid start configuration");
+            log("Dominos  > " + dom_s);
+            log("Explore  > " + explore.map((i) => i + 1).join(""));
+            log("Top      > " + explore.map((i) => dominos[i][0]).join(""));
+            log("Bottom   > " + explore.map((i) => dominos[i][1]).join(""));
             return;
         case "not_found":
             console.log("No solution for dominos found " + dom_s);
             return;
         default:
-            console.log("Found solution of length " + result.length);
-            console.log("Dominos  > " + dom_s);
+            log("Found solution of length " + result.length);
             console.log("Solution > " + result.map((i) => i + 1).join(","));
-            console.log(
-                "Top      > " + result.map((i) => dominos[i][0]).join("")
-            );
-            console.log(
-                "Bottom   > " + result.map((i) => dominos[i][1]).join("")
-            );
+            log("Top      > " + result.map((i) => dominos[i][0]).join(""));
+            log("Bottom   > " + result.map((i) => dominos[i][1]).join(""));
     }
 }
 
@@ -167,7 +182,7 @@ const options_definition = [
 ];
 
 const range_regex = /^(\d+)(\.\.(\d+)(:(\d+))?)?$/;
-const domino_regex = /^([^,\s]),([^,\s])$/;
+const domino_regex = /^([^,\s]+),([^,\s]+)$/;
 const whitespace_regex = /\s+/;
 
 function read_dominos(filePath) {
@@ -176,7 +191,7 @@ function read_dominos(filePath) {
 }
 
 function validate_options(options) {
-    const { budget, dominos, read, explore, help, max_op, reverse, verbose } =
+    const { budget, dominos, read, explore, help, "max-op": max_op, reverse, verbose } =
         options;
     const result = { help, max_op, reverse, verbose };
 
@@ -196,47 +211,43 @@ function validate_options(options) {
 
     result.budget = { start, end, step };
 
+    if (max_op != undefined && max_op <=0) {
+        throw new Error("Maximal operations must be greater than zero");
+    }
     if (dominos != undefined && read != undefined) {
         throw new Error("Mutual exclusive arguments '--dominos' and '--read'");
     }
-    let ds =
-        dominos != undefined
-            ? dominos
-            : read != undefined
-              ? read_dominos(read)
-              : read_dominos(0);
+    let ds = (dominos ?? read_dominos(read ?? 0))
+        .map((s) => s.trim())
+        .filter((s) => s != "");
 
     if (ds.length == 0) {
         throw new Error("Dominos must not be empty");
     }
 
-    result.dominos = ds
-        .filter((s) => s != "")
-        .map((domino) => {
-            const match = domino.match(domino_regex);
-            if (
-                match == undefined ||
-                match[1] == undefined ||
-                match[2] == undefined
-            ) {
-                throw new Error("Invalid formatted domino " + domino);
-            }
-            return [match[1], match[2]];
-        });
+    result.dominos = ds.map((domino) => {
+        const match = domino.match(domino_regex);
+        if (
+            match == undefined ||
+            match[1] == undefined ||
+            match[2] == undefined
+        ) {
+            throw new Error('Invalid formatted domino "' + domino + '"');
+        }
+        return [match[1], match[2]];
+    });
 
     const dominos_amount = result.dominos.length;
 
-    if (explore != undefined) {
-        result.explore = explore.map((index) => {
-            index = index - 1;
-            if (0 <= index && index < dominos_amount) {
-                return index;
-            }
-            throw new Error(
-                "Explore index " + i + " out of bounds (" + dominos_amount + ")"
-            );
-        });
-    }
+    result.explore = (explore ?? []).map((index) => {
+        index = index - 1;
+        if (0 <= index && index < dominos_amount) {
+            return index;
+        }
+        throw new Error(
+            "Explore index " + i + " out of bounds (" + dominos_amount + ")"
+        );
+    });
 
     return result;
 }
@@ -276,19 +287,7 @@ const usage_definition = [
     },
 ];
 
-function processOptions(options) {
-    if (options === undefined) {
-        console.log(
-            "Usage: node pcp.js [instance 1,2,3] [start_budget int] [end_budget int]\n" +
-                "                   [incrementer int] [explore [int]]"
-        );
-        return;
-    }
-    print_solution(options, iterate_search_space(options));
-}
-
 function main() {
-    let options;
     try {
         options = validate_options(command_ling_args(options_definition));
     } catch (err) {
@@ -301,8 +300,9 @@ function main() {
         console.log(command_ling_usage(usage_definition));
         process.exit(0);
     }
-
     console.log(options);
+
+    process_options(options);
 }
 
 main();
