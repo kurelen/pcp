@@ -18,11 +18,18 @@ function is_balanced(domino) {
     return domino[0] === domino[1];
 }
 
-function solve(dominos, budget, start_difference, reverse) {
+function solve({ dominos, budget, explore, reverse }) {
     const result = [];
     const indices = [...dominos.keys()];
     if (reverse) {
         indices.reverse();
+    }
+
+    const start_difference = shrink(
+        explore.map((i) => dominos[i]).reduce(merge, ["", ""])
+    );
+    if (start_difference === undefined) {
+        return undefined;
     }
 
     function recursion_step(difference, remaining_budget) {
@@ -44,7 +51,7 @@ function solve(dominos, budget, start_difference, reverse) {
 
     recursion_step(start_difference, budget);
 
-    return result.reverse();
+    return result.length > 0 ? [...explore, ...result.reverse()] : [];
 }
 
 module.exports = {

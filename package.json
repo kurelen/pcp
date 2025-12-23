@@ -20,11 +20,19 @@
         "type": "git",
         "url": "git+https://github.com/kurelen/pcp.git"
     },
-    "keywords": [],
+    "keywords": [
+        "pcp",
+        "post-correspondence-problem",
+        "puzzle",
+        "solver"
+    ],
     "author": "Alexander Jandt",
     "license": "Unlicense",
     "bugs": {
         "url": "https://github.com/kurelen/pcp/issues"
+    },
+    "engines": {
+        "node": ">=18.0.0"
     },
     "homepage": "https://github.com/kurelen/pcp#readme",
     "devDependencies": {

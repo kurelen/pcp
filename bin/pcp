@@ -15,21 +15,14 @@ function iterate_search_space(options) {
     } = options;
     const log = verbose ? console.log : noop;
 
-    const exploration = explore.map((i) => dominos[i]).reduce(pcp.merge, ["", ""]);
-    if (explore.length > 0) {
-        log("Reify    > " + exploration.join(","));
-    }
-
-    const start_difference = pcp.shrink(exploration);
-
-    if (start_difference === undefined) {
-        return { type: "error" };
-    }
     for (let budget = start; budget <= end; budget += step) {
         log("Search with budget " + budget);
 
-        const solution = pcp.solve(dominos, budget, start_difference, reverse);
-        if (solution.length !== 0) {
+        const solution = pcp.solve({ ...options, budget });
+        if (solution === undefined) {
+            return { type: "error" };
+        }
+        else if (solution.length !== 0) {
             return { type: "found", result: [...explore, ...solution] };
         }
     }
@@ -66,7 +59,8 @@ function process_options(options) {
             return;
         default:
             log("Found solution of length " + result.length);
-            console.log("Solution > " + result.map((i) => i + 1).join(","));
+            log("Solution > ")
+            console.log(result.map((i) => i + 1).join(","));
             log("Top      > " + result.map((i) => dominos[i][0]).join(""));
             log("Bottom   > " + result.map((i) => dominos[i][1]).join(""));
     }
