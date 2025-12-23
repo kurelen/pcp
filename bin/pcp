@@ -100,6 +100,13 @@ const options_definition = [
             "Start with specific domino indices (1-based). Example: --explore 4 2",
     },
     {
+        name: "limit",
+        alias: "l",
+        type: Number,
+        typeLabel: "{underline amount}",
+        description: "Limit the amount of operations available for each budget"
+    },
+    {
         name: "help",
         alias: "h",
         type: Boolean,
@@ -129,8 +136,8 @@ function read_dominos(filePath) {
 }
 
 function validate_options(options) {
-    const { budget, dominos, read, explore, help, reverse, verbose } = options;
-    const result = { help, reverse, verbose };
+    const { budget, dominos, read, explore, limit, help, reverse, verbose } = options;
+    const result = { help, limit, reverse, verbose };
 
     if (budget === undefined) {
         throw new Error("Missing budget (--budget)");
@@ -144,6 +151,10 @@ function validate_options(options) {
     const step = match[5] ? parseInt(match[5], 10) : 1;
     if (start > end) {
         throw new Error("Invalid range, " + start + " > " + end);
+    }
+
+    if (limit !== undefined && Number.isSafeInteger(limit) && limit <= 0) {
+        throw new Error("Limit must be positive integer, supplied " + limit);
     }
 
     result.budget = { start, end, step };

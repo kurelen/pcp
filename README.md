@@ -19,6 +19,7 @@ Run using the CLI:
 - `-r, --read file` - Read dominos from a file (whitespace separated)
 - `-b, --budget range` - Budget range. Examples: "200" for single value, "200..210" for range with step 1, "200..210:2" for custom step
 - `-e, --explore indices...` - Start with specific domino indices (1-based)
+- `-l, --limit amount` - Limit the amount of operations available for each budget
 - `-x, --reverse` - Iterate over dominos in reverse order
 - `-v, --verbose` - Verbose output
 - `-h, --help` - Display usage guide
@@ -57,4 +58,3 @@ npm run i1
 npm run i2
 npm run i3
 ```
-

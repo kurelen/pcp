@@ -18,12 +18,13 @@ function is_balanced(domino) {
     return domino[0] === domino[1];
 }
 
-function solve({ dominos, budget, explore, reverse }) {
+function solve({ dominos, budget, explore, reverse, limit }) {
     const result = [];
     const indices = [...dominos.keys()];
     if (reverse) {
         indices.reverse();
     }
+    const in_limit = limit === undefined ? () => true : () => 0 < limit--;
 
     const start_difference = shrink(
         explore.map((i) => dominos[i]).reduce(merge, ["", ""])
@@ -33,7 +34,7 @@ function solve({ dominos, budget, explore, reverse }) {
     }
 
     function recursion_step(difference, remaining_budget) {
-        if (remaining_budget <= 0 || difference === undefined) {
+        if (remaining_budget <= 0 || difference === undefined || !in_limit()) {
             return false;
         }
         for (const i of indices) {
