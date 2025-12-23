@@ -26,6 +26,7 @@ test("pcp.solve", () => {
             ["a", "ab"],
             ["bb", "b"],
             ["c", "cb"],
+            ["x", "y"],
         ],
         budget: 5,
         explore: [],
@@ -33,5 +34,6 @@ test("pcp.solve", () => {
     };
     assert.deepStrictEqual(pcp.solve(instance), [0, 1]);
     assert.deepStrictEqual(pcp.solve({ ...instance, reverse: true }), [2, 1]);
-    assert.deepStrictEqual(pcp.solve({ ...instance, explore: [1] }), undefined);
+    assert.deepStrictEqual(pcp.solve({ ...instance, explore: [1] }), []);
+    assert.deepStrictEqual(pcp.solve({ ...instance, explore: [3] }), undefined);
 });
