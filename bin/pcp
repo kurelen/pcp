@@ -5,6 +5,8 @@ const command_line_args = require("command-line-args");
 const command_line_usage = require("command-line-usage");
 const pcp = require("../src/pcp.js");
 
+let log = () => undefined;
+
 function iterate_search_space(options) {
     const {
         dominos,
@@ -13,7 +15,6 @@ function iterate_search_space(options) {
         verbose,
         reverse,
     } = options;
-    const log = verbose ? console.log : noop;
 
     for (let budget = start; budget <= end; budget += step) {
         log("Search with budget " + budget);
@@ -21,21 +22,15 @@ function iterate_search_space(options) {
         const solution = pcp.solve({ ...options, budget });
         if (solution === undefined) {
             return { type: "error" };
-        }
-        else if (solution.length !== 0) {
+        } else if (solution.length !== 0) {
             return { type: "found", result: solution };
         }
     }
     return { type: "not_found" };
 }
 
-function noop() {
-    return undefined;
-}
-
 function process_options(options) {
     const { dominos, explore, verbose } = options;
-    const log = verbose ? console.log : noop;
     const dom_s = dominos
         .map((domino, index) => `${index + 1}:(${domino[0]},${domino[1]})`)
         .join(" ");
@@ -59,7 +54,7 @@ function process_options(options) {
             return;
         default:
             log("Found solution of length " + result.length);
-            log("Solution > ")
+            log("Solution > ");
             console.log(result.map((i) => i + 1).join(","));
             log("Top      > " + result.map((i) => dominos[i][0]).join(""));
             log("Bottom   > " + result.map((i) => dominos[i][1]).join(""));
@@ -87,6 +82,7 @@ const options_definition = [
         alias: "b",
         type: String,
         typeLabel: "{underline range}",
+        defaultValue: "10..100:5",
         description:
             'Budget range. Examples: "200" for a single value, "200..210" for range with step 1, "200..200:2" for custom step',
     },
@@ -104,7 +100,7 @@ const options_definition = [
         alias: "l",
         type: Number,
         typeLabel: "{underline amount}",
-        description: "Limit the amount of operations available for each budget"
+        description: "Limit the amount of operations available for each budget",
     },
     {
         name: "help",
@@ -136,8 +132,12 @@ function read_dominos(filePath) {
 }
 
 function validate_options(options) {
-    const { budget, dominos, read, explore, limit, help, reverse, verbose } = options;
+    const { budget, dominos, read, explore, limit, help, reverse, verbose } =
+        options;
     const result = { help, limit, reverse, verbose };
+    if (verbose) {
+        log = console.log;
+    }
 
     if (budget === undefined) {
         throw new Error("Missing budget (--budget)");
@@ -162,9 +162,19 @@ function validate_options(options) {
     if (dominos !== undefined && read !== undefined) {
         throw new Error("Mutual exclusive arguments '--dominos' and '--read'");
     }
+    if (dominos !== undefined) {
+        // noop
+    } else if (read !== undefined) {
+        log("Read from file " + read);
+    } else {
+        log(
+            "Enter dominos as whitespace seperated tuples seperated by comma. End input with Ctrl-d"
+        );
+    }
     const ds = (dominos ?? read_dominos(read ?? 0))
         .map((s) => s.trim())
         .filter((s) => s !== "");
+    log("");
 
     if (ds.length === 0) {
         throw new Error("Dominos must not be empty");

@@ -11,8 +11,8 @@
         "i2": "./bin/pcp --read instance_2.txt --budget=204 --explore 4 2 --reverse",
         "i3": "./bin/pcp --read instance_3.txt --budget=240",
         "test": "node --test",
-        "format": "prettier --write \"**/*.{js,json,md,mjs}\"",
-        "format:check": "prettier --check \"**/*.{js,json,md,mjs}\"",
+        "format": "prettier --write \"**/*.{js,json,md,mjs}|bin/pcp\"",
+        "format:check": "prettier --check \"**/*.{js,json,md,mjs}|bin/pcp\"",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix"
     },
