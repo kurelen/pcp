@@ -5,21 +5,37 @@ Small javascript doodle to find solutions to some
 
 ## Usage
 
-Run using nodejs:
+Run using the CLI:
 
-`node pcp.js [instance] [start_budget] [[end_budget] [incrementer] [explore]]`
+```bash
+./bin/pcp [options]
+```
 
-With:
+### Options
 
-- `[instance]` in 1, 2, 3
-- `[start_budget]` non-negative number
-- `[end_budget]` non-negative number greater than [start_budget]
-- `[incrementer]` non-negative number
-- `[explore]` indices of dominos
+- `-d, --dominos string[]` - Dominos in format "top,bottom" separated by spaces
+- `-r, --read file` - Read dominos from a file (whitespace separated)
+- `-b, --budget range` - Budget range. Examples: "200" for single value, "200..210" for range with step 1, "200..210:2" for custom step
+- `-e, --explore indices...` - Start with specific domino indices (1-based)
+- `-x, --reverse` - Iterate over dominos in reverse order
+- `-v, --verbose` - Verbose output
+- `-h, --help` - Display usage guide
 
-For example `node pcp.js 1 100 300 50 2 2` searches in instance `1` starting with
-budget `100`, going up to budget `300` increasing by `50`, and exploring the
-search space by requiring a solution to start with `2,2`.
+### Examples
+
+```bash
+# Using stdin
+node pcp.js --budget 200..210:2
+
+# Inline dominos
+./bin/pcp --dominos 11101,0110 110,1 1,1011 --budget 302
+
+# From file
+./bin/pcp --read instance_2.txt --budget 200..210 --reverse
+
+# With explore
+./bin/pcp --dominos 000,0 0,111 11,0 10,100 --budget 202 --reverse --explore 4 2
+```
 
 ## Project structure
 
