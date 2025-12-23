@@ -45,6 +45,7 @@ Linting and formatting via npm modules Prettier and Eslint
 npm install
 npm run lint
 npm run format
+npm run test
 ```
 
 To find solutions to the instances:
@@ -55,11 +56,3 @@ npm run i2
 npm run i3
 ```
 
-## To do
-
-The solution to instance 2 was found by luck, rearranging the dominos was necessary
-and implementing the explore flag, as well as starting it not with the (0,000) one.
-The solution was found due to the lucky guess of budget 220.
-
-Is there a way to improve the code such that it reasons about some dominos
-configurations?
