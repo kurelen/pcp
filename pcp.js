@@ -26,16 +26,16 @@ function is_balanced(domino) {
 
 function solve_pcp(dominos, budget, start_difference, reverse) {
     const result = [];
+    const indices = [...dominos.keys()];
+    if (reverse) {
+        indices.reverse();
+    }
 
     function recursion_step(difference, remaining_budget) {
         if (remaining_budget <= 0 || difference === undefined) {
             return false;
         }
-        for (
-            let i = reverse ? dominos.length - 1 : 0;
-            reverse ? i >= 0 : i < dominos.length;
-            reverse ? i-- : i++
-        ) {
+        for (const i in indices) {
             const merged_domino = merge(difference, dominos[i]);
             if (
                 is_balanced(merged_domino) ||
