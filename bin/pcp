@@ -1,57 +1,9 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
-const command_ling_args = require("command-line-args");
-const command_ling_usage = require("command-line-usage");
-
-function merge(domino_1, domino_2) {
-    return [domino_1[0] + domino_2[0], domino_1[1] + domino_2[1]];
-}
-
-function shrink(domino) {
-    const [t, b] = domino;
-    let i = 0;
-    while (i < t.length && i < b.length) {
-        if (t[i] !== b[i]) {
-            return undefined;
-        }
-        i++;
-    }
-    return [t.slice(i), b.slice(i)];
-}
-
-function is_balanced(domino) {
-    return domino[0] === domino[1];
-}
-
-function solve_pcp(dominos, budget, start_difference, reverse) {
-    const result = [];
-    const indices = [...dominos.keys()];
-    if (reverse) {
-        indices.reverse();
-    }
-
-    function recursion_step(difference, remaining_budget) {
-        if (remaining_budget <= 0 || difference === undefined) {
-            return false;
-        }
-        for (const i in indices) {
-            const merged_domino = merge(difference, dominos[i]);
-            if (
-                is_balanced(merged_domino) ||
-                recursion_step(shrink(merged_domino), remaining_budget - 1)
-            ) {
-                result.push(i);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    recursion_step(start_difference, budget);
-
-    return result.reverse();
-}
+const command_line_args = require("command-line-args");
+const command_line_usage = require("command-line-usage");
+const pcp = require("../src/pcp.js");
 
 function iterate_search_space(options) {
     const {
@@ -63,12 +15,12 @@ function iterate_search_space(options) {
     } = options;
     const log = verbose ? console.log : noop;
 
-    const exploration = explore.map((i) => dominos[i]).reduce(merge, ["", ""]);
+    const exploration = explore.map((i) => dominos[i]).reduce(pcp.merge, ["", ""]);
     if (explore.length > 0) {
         log("Reify    > " + exploration.join(","));
     }
 
-    const start_difference = shrink(exploration);
+    const start_difference = pcp.shrink(exploration);
 
     if (start_difference === undefined) {
         return { type: "error" };
@@ -76,7 +28,7 @@ function iterate_search_space(options) {
     for (let budget = start; budget <= end; budget += step) {
         log("Search with budget " + budget);
 
-        const solution = solve_pcp(dominos, budget, start_difference, reverse);
+        const solution = pcp.solve(dominos, budget, start_difference, reverse);
         if (solution.length !== 0) {
             return { type: "found", result: [...explore, ...solution] };
         }
@@ -281,15 +233,15 @@ const usage_definition = [
 function main() {
     let options;
     try {
-        options = validate_options(command_ling_args(options_definition));
+        options = validate_options(command_line_args(options_definition));
     } catch (err) {
         console.error(err.message);
-        console.log(command_ling_usage(usage_definition));
+        console.log(command_line_usage(usage_definition));
         process.exit(1);
     }
 
     if (options.help) {
-        console.log(command_ling_usage(usage_definition));
+        console.log(command_line_usage(usage_definition));
         process.exit(0);
     }
 

@@ -2,12 +2,15 @@
     "name": "pcp",
     "version": "1.0.0",
     "description": "Small javascript doodle to find solutions to some pcp instances.",
-    "main": "pcp.js",
+    "main": "src/pcp.js",
+    "bin": {
+        "pcp": "./bin/pcp"
+    },
     "scripts": {
-        "i1": "./pcp.js --read instance_1.txt --budget=302",
-        "i2": "./pcp.js --read instance_2.txt --budget=204 --explore 4 2 --reverse",
-        "i3": "./pcp.js --read instance_3.txt --budget=240",
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "i1": "./bin/pcp --read instance_1.txt --budget=302",
+        "i2": "./bin/pcp --read instance_2.txt --budget=204 --explore 4 2 --reverse",
+        "i3": "./bin/pcp --read instance_3.txt --budget=240",
+        "test": "node --test",
         "format": "prettier --write \"**/*.{js,json,md,mjs}\"",
         "format:check": "prettier --check \"**/*.{js,json,md,mjs}\"",
         "lint": "eslint .",
